@@ -1,7 +1,9 @@
 civicrm-relationshipMembershipACL-module
 ========================================
 
-CiviCRM module to use relationships edit rights to determine Membership visibility
+CiviCRM module to use relationships edit rights to determine Membership visibility.
+
+This module creates new Relationship between user contact and Membership Type Owner organisation when new Membership is created. Relationship gives user contact editing rights to Membership Type organisation. This relationship is needed to automate permission granting to organisations to enable them to edit their members. Created Relationship type is specified in this module config table (more info on installation instructions).
 
 This module filters search results rows on following pages:
 * Find Memberships
