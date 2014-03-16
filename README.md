@@ -39,7 +39,7 @@ User 1 can not see User 2 membership to Organisation 1 because User 1 does not h
 
 ### Installation
 1. Create `com.github.anttikekki.relationshipMembershipACL` folder to CiviCRM extension folder and copy all files into it. Install and enable extension in administration.
-2. Insert row to this module configuration table `civicrm_relationshipMembershipACL_config`. `config_key` column value is `membershipRelationshipTypeAtoBName` and `congif_value` column value is Relationship A to B name that defines membership berween contacts.
+2. Insert row to this module configuration table `civicrm_relationshipMembershipACL_config`. `config_key` column value is `membershipRelationshipTypeAtoBName` and `congif_value` column value is Relationship A to B name that defines membership between contacts.
 
 This module uses temporary tables in database so CiviCRM MySQL user has to have permissions to create these kind of tables.
 
