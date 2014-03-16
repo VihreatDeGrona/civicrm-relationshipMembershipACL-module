@@ -24,12 +24,18 @@ Version history and changelog is available in [Releases](https://github.com/antt
 * Sub-organisation 1 (Organisation 1 has edit relationship to this organisation)
 * Sub-organisation 2 (Sub-organisation 1 has edit relationship to this organisation)
 * User 1 (has edit relationship to Sub-organisation 1)
+* User 2 (has edit relationship to Sub-organisation 1)
+* User 3 (has edit relationship to Sub-organisation 2)
 
-Contribution pages
-* Contribution page 1. Owned by Organisation 1.
-* Contribution page 2. Owned by Sub-organisation 2.
+Membershipt Types
+* Organisation 1 membership
+* Sub-organisation 2 membership
 
-With this module User 1 can see and edit Contribution page 2 but not Contribution page 1. Contribution page 2 is owned by Sub-organisation 2 that User 1 has edit rights. User 1 does not have edit rights to Organisation 1 so this Contribution page is invisible to user.
+Memberships
+* User 2 has membersip to Organisation 1
+* User 3 has membersip to Sub-organisation 2
+
+User 1 can not see User 2 membership to Organisation 1 because User 1 does not have edit relationship to Organisation 1. User 1 can see User 3 membership to Sub-organisation 2 because User 1 has edit relationship to Sub-organisation 2 trough Sub-organisation 1.
 
 ### Installation
 1. Create `com.github.anttikekki.relationshipMembershipACL` folder to CiviCRM extension folder and copy all files into it. Install and enable extension in administration.
