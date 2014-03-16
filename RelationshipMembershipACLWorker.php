@@ -16,6 +16,22 @@ RelationshipACLQueryWorker::checkVersion("1.1");
 class RelationshipMembershipACLWorker {
 
   /**
+  * Config key for civicrm_relationshipMembershipACL_config table. This key 
+  * stores Relationship A to B name that defines membership between contacts. Relationship of this name 
+  * is created when new Menbership is created.
+  */
+  const CONFIG_KEY_MEMBERSHIP_RELATIONSHIP_TYPE_A_TO_B_NAME = "membershipRelationshipTypeAtoBName";
+  
+  /**
+  * Executed when Membership table row is created/updated
+  *
+  * @param CRM_Member_DAO_Membership $dao Dao that is used to save Membership
+  */
+  public function membershipPostSaveHook(&$dao) {
+    $this->insertOrUpdateMembershipRelation($dao);
+  }
+
+  /**
   * Executed when Contact Membership Tab or Edit Membership is displayed
   *
   * @param CRM_Member_Page_Tab $form Contact Membership tab
@@ -199,6 +215,23 @@ class RelationshipMembershipACLWorker {
   }
   
   /**
+  * Returns owner Contact id of given Membership Type.
+  *
+  * @param int|string Membership type id
+  * @return int Membership tye Owner Contact Id
+  */
+  private function getMembershipTypeOwnerContactId($membershipTypeId) {
+    $membershipTypeId = (int) $membershipTypeId;
+    
+    $sql = "
+      SELECT member_of_contact_id
+      FROM civicrm_membership_type
+      WHERE id = $membershipTypeId
+    ";
+    return (int) CRM_Core_DAO::singleValueQuery($sql);
+  }
+  
+  /**
   * Returns all Membership Types.
   *
   * @return array Array where key is Membership Type id and value is Owner Contact Id
@@ -224,6 +257,112 @@ class RelationshipMembershipACLWorker {
     }
     
     return $membershipTypeIdForMembershipId;
+  }
+  
+  /**
+  * Inserts new and/or removes old Membership relationship between Membership Type Owner organisation 
+  * and Contact with Membership. Membership relation is defined in this module config.
+  *
+  * @param CRM_Member_DAO_Membership $dao Dao that is used to save Membership
+  */
+  private function insertOrUpdateMembershipRelation(&$dao) {
+    $membershipRelationshipTypeId = $this->getMembershipRelationshipTypeAtoBId();
+    $contactId = $dao->contact_id;
+    $organisationContactId = $this->getMembershipTypeOwnerContactId($dao->membership_type_id);
+    
+    if(!$this->isMembershipRelationCreated($contactId, $organisationContactId, $membershipRelationshipTypeId)) {
+      $this->insertMembershipRelationship($contactId, $organisationContactId, $membershipRelationshipTypeId);
+    }
+  }
+  
+  /**
+  * Creates Membership relation between user and Membership type owner organisation.
+  *
+  * @param int|string $contactId Membership contact id. User that has membershipt to organisation.
+  * @param int|string $organisationContactId Contact id of organisation that is owner of Membership type. Organisation that user has joined.
+  * @param int|string $relationshipTypeId Id of relationship type that defines membership relation between Contacts. This is retrieved from module config.
+  */
+  private function insertMembershipRelationship($contactId, $organisationContactId, $relationshipTypeId) {
+    $contactId = (int) $contactId;
+    $organisationContactId = (int) $organisationContactId;
+    $relationshipTypeId = (int) $relationshipTypeId;
+    
+    $sql = "
+      INSERT INTO civicrm_relationship(contact_id_a, contact_id_b, relationship_type_id, start_date, end_date, is_active, description, is_permission_a_b, is_permission_b_a, case_id) VALUES ($contactId, $organisationContactId, $relationshipTypeId, NULL, NULL, 1, '', 0, 1, NULL)
+    ";
+    
+    CRM_Core_DAO::executeQuery($sql);
+  }
+  
+  /**
+  * Checks if Membership relation exists between user and Membership type owner organisation.
+  *
+  * @param int|string $contactId Membership contact id. User that has membershipt to organisation.
+  * @param int|string $organisationContactId Contact id of organisation that is owner of Membership type. Organisation that user has joined.
+  * @param int|string $relationshipTypeId Id of relationship type that defines membership relation between Contacts. This is retrieved from module config.
+  * @return boolean Is Membership relation created?
+  */
+  private function isMembershipRelationCreated($contactId, $organisationContactId, $relationshipTypeId) {
+    $contactId = (int) $contactId;
+    $organisationContactId = (int) $organisationContactId;
+    $relationshipTypeId = (int) $relationshipTypeId;
+  
+    $sql = "
+      SELECT id  
+      FROM civicrm_relationship
+      WHERE contact_id_a = $contactId
+        AND contact_id_b = $organisationContactId
+        AND relationship_type_id = $relationshipTypeId
+    ";
+    
+    $relationshipId = (int) CRM_Core_DAO::singleValueQuery($sql);
+    return $relationshipId != 0;
+  }
+  
+  /**
+  * Return Membership relationship Type A to B id. This relation type
+  * is used to add relation between Membership type Owner contact and new membership 
+  * contact.
+  *
+  * @return int Membership relation type A to B id.
+  */
+  private function getMembershipRelationshipTypeAtoBId() {
+    $relationTypeName = $this->getMembershipRelationshipTypeAtoBNameFromConfig();
+  
+    $sql = "
+      SELECT id  
+      FROM civicrm_relationship_type
+      WHERE name_a_b = '$relationTypeName'
+    ";
+    
+    $membershipRelationId = (int) CRM_Core_DAO::singleValueQuery($sql);
+    if(!isset($membershipRelationId)) {
+      CRM_Core_Error::fatal(ts('relationshipMembershipACL module config table Membership relation A to B is not a name od any Relationship Type.'));
+    }
+    
+    return $membershipRelationId;
+  }
+  
+  /**
+  * Return Membership relationship Type A to B name from module config table. This relation 
+  * name is used to add relation between Membership type Owner contact and new membership 
+  * contact.
+  *
+  * @return string Membership relation type A to B name.
+  */
+  private function getMembershipRelationshipTypeAtoBNameFromConfig() {
+    $sql = "
+      SELECT config_value  
+      FROM civicrm_relationshipMembershipACL_config
+      WHERE config_key = '".RelationshipMembershipACLWorker::CONFIG_KEY_MEMBERSHIP_RELATIONSHIP_TYPE_A_TO_B_NAME."'
+    ";
+    
+    $membershipRelationName = CRM_Core_DAO::singleValueQuery($sql);
+    if(!isset($membershipRelationName)) {
+      CRM_Core_Error::fatal(ts('Membership relation A to B name is missing from relationshipMembershipACL module config table.'));
+    }
+    
+    return $membershipRelationName;
   }
   
   /**
