@@ -16,12 +16,21 @@ RelationshipACLQueryWorker::checkVersion("1.1");
 class RelationshipMembershipACLWorker {
 
   /**
-  * Executed when Contact Membership Tab is displayed
+  * Executed when Contact Membership Tab or Edit Membership is displayed
   *
   * @param CRM_Member_Page_Tab $form Contact Membership tab
   */
   public function contactMembershipTabAlterTemplateFileHook(&$form) {
-    $this->filterActiveMemberships($form);
+    $membershipId = (int) $form->get('id');
+  
+    //No membership id means Contact Membership Tab
+    if($membershipId == 0) {
+      $this->filterActiveMemberships($form);
+    }
+    //Membership id is set. Edit Membership form.
+    else {
+      $this->checkEditMembershipPermission($membershipId);
+    }
   }
   
   /**
@@ -46,14 +55,31 @@ class RelationshipMembershipACLWorker {
   }
   
   /**
+  * Check if current logged in user has rights to edit selected Membership. Show fatal error if no permission.
+  *
+  * @param int $membershipId Membership id
+  */
+  private function checkEditMembershipPermission($membershipId) {
+    $allowedMembershipIds = $this->getAllowedMembershipIds(array($membershipId));
+    
+    if(count($allowedMembershipIds) === 0) {
+      CRM_Core_Error::fatal(ts('You do not have permission to edit this Membership'));
+    }
+  }
+  
+  /**
   * Filters active memberships so that current logged in used does not see memberships to 
   * organisations where logged in user does not have editing rights.
   *
   * @param CRM_Member_Page_Tab $form Contact Membershipt tab
   */
-  public function filterActiveMemberships(&$form) {
+  private function filterActiveMemberships(&$form) {
     $template = $form->getTemplate();
     $activeMemberships = $template->get_template_vars("activeMembers");
+    
+    if(!is_array($activeMemberships)) {
+      return;
+    }
     
     $allowedMembershipTypeIds = $this->getAllowedMembershipTypeIds();
     
@@ -74,7 +100,7 @@ class RelationshipMembershipACLWorker {
   *
   * @param CRM_Member_Form_Search $form Membership search form
   */
-  public function filterMemberships(&$form) {
+  private function filterMemberships(&$form) {
     $template = $form->getTemplate();
     $rows = $template->get_template_vars("rows");
     

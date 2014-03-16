@@ -15,7 +15,7 @@ require_once "RelationshipMembershipACLWorker.php";
 * @param String $tplName The file name of the tpl - alter this to alter the file in use.
 */
 function relationshipMembershipACL_civicrm_alterTemplateFile($formName, &$form, $context, &$tplName) {
-  //Contact Membersip tab
+  //Contact Membership tab and Edit Membership form
   if($form instanceof CRM_Member_Page_Tab) {
     $worker = new RelationshipMembershipACLWorker();
     $worker->contactMembershipTabAlterTemplateFileHook($form);
