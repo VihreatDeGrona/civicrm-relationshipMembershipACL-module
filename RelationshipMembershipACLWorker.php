@@ -169,19 +169,25 @@ class RelationshipMembershipACLWorker {
   
   /**
   * Returns all Membership Types that owner organisation contact current logged in user has 
-  * editing rights. Editing rights are based on relationship tree.
+  * editing rights. Editing rights are based on relationship tree. Administrator can see all membership types.
   *
   * @return array Array of allowed Membership Type ids
   */
   private function getAllowedMembershipTypeIds() {
+    
+    //Load all Membership Types
+    $ownerContactIdForMembershiptTypeId = $this->getAllMembershipTypes();
+
+    //Administrator can see all membership types
+    if(user_access('administer CiviCRM')) {
+      return array_keys($ownerContactIdForMembershiptTypeId);
+    }
+
     $currentUserContactID = $this->getCurrentUserContactID();
     
     //All contact IDs the current logged in user has rights to edit through relationships
     $worker = RelationshipACLQueryWorker::getInstance();
     $allowedContactIDs = $worker->getContactIDsWithEditPermissions($currentUserContactID);
-    
-    //Load all Membership Types
-    $ownerContactIdForMembershiptTypeId = $this->getAllMembershipTypes();
     
     //Filter Membershipt types
     foreach ($ownerContactIdForMembershiptTypeId as $membershipTypeId => $ownerContactId) {
