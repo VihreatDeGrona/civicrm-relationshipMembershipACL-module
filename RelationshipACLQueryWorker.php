@@ -109,7 +109,7 @@ class RelationshipACLQueryWorker {
     $now = date('Y-m-d');
 
     //B to A
-    $sql = "INSERT INTO $resultTableName
+    $sql = "REPLACE INTO $resultTableName
       SELECT DISTINCT contact_id_a 
       FROM civicrm_relationship
       WHERE contact_id_b = $contactID
@@ -187,8 +187,7 @@ class RelationshipACLQueryWorker {
   private function createTempTable($tableName) {
     $sql = "CREATE TEMPORARY TABLE $tableName
     (
-     `contact_id` INT(10) NULL DEFAULT NULL,
-     PRIMARY KEY (`contact_id`)
+     `contact_id` INT(10) NULL DEFAULT NULL UNIQUE
     )";
     CRM_Core_DAO::executeQuery($sql);
   }
