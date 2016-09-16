@@ -68,8 +68,8 @@ class RelationshipACLQueryWorker {
       return $this->resultTableName;
     }
   
-    $resultTableName = 'relationship_event_acl_result' . rand(10000, 100000);
-    $workTableName = 'relationship_event_acl_worktemp' . rand(10000, 100000);
+    $resultTableName = 'relationship_event_acl_result' . date("Ymd") . uniqid();
+    $workTableName = 'relationship_event_acl_worktemp' . date("Ymd") . uniqid();
     
     //Create temporary tables
     $this->createTempTable($resultTableName);
