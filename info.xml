@@ -16,7 +16,7 @@
     <email>anttikekki@gmail.com</email>
   </maintainer>
   <releaseDate>2014-09-10</releaseDate>
-  <version>1.2</version>
+  <version>1.2.2</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
