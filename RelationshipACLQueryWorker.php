@@ -6,14 +6,14 @@
 *
 * This worker traverses the whole contact relation tree from given contact id.
 *
-* @version 1.2
+* @version 1.2.1
 */
 class RelationshipACLQueryWorker {
 
   /**
   * Version of this worker
   */
-  const VERSION = "1.2";
+  const VERSION = "1.2.1";
 
   /**
   * Singleton instace of this worker
@@ -68,8 +68,8 @@ class RelationshipACLQueryWorker {
       return $this->resultTableName;
     }
   
-    $resultTableName = 'relationship_event_acl_result' . rand(10000, 100000);
-    $workTableName = 'relationship_event_acl_worktemp' . rand(10000, 100000);
+    $resultTableName = 'relationship_event_acl_result' . date("Ymd") . uniqid();
+    $workTableName = 'relationship_event_acl_worktemp' . date("Ymd") . uniqid();
     
     //Create temporary tables
     $this->createTempTable($resultTableName);

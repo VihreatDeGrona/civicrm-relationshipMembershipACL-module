@@ -7,7 +7,7 @@
 if(class_exists('RelationshipACLQueryWorker') === false) {
   require_once "RelationshipACLQueryWorker.php";
 }
-RelationshipACLQueryWorker::checkVersion("1.2");
+RelationshipACLQueryWorker::checkVersion("1.2.1");
 
 
 /**
