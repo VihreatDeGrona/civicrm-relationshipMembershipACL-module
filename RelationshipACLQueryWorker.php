@@ -6,14 +6,14 @@
 *
 * This worker traverses the whole contact relation tree from given contact id.
 *
-* @version 1.2
+* @version 1.3
 */
 class RelationshipACLQueryWorker {
 
   /**
   * Version of this worker
   */
-  const VERSION = "1.2";
+  const VERSION = "1.3";
 
   /**
   * Singleton instace of this worker
