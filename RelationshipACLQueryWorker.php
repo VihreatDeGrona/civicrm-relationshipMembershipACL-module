@@ -187,8 +187,10 @@ class RelationshipACLQueryWorker {
   private function createTempTable($tableName) {
     $sql = "CREATE TEMPORARY TABLE $tableName
     (
+     `id` INT(10) NOT NULL AUTO_INCREMENT,
      `contact_id` INT(10) NULL DEFAULT NULL,
-     PRIMARY KEY (`contact_id`)
+     PRIMARY KEY (`id`),
+     UNIQUE ('contact_id')
     )";
     CRM_Core_DAO::executeQuery($sql);
   }
